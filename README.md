@@ -11,7 +11,7 @@ observer is a [Go](http://golang.org) package that aims to simplify the problem
 of channel-based broadcasting of events from one or more publishers to one or
 more observers.
 
-# Problem
+## Problem
 
 The typical quick-and-dirty approach to notifying a set of observers in go is
 to use channels and call each in a for loop, like the following:
@@ -35,7 +35,7 @@ the broadcaster doesn't block. Unfortunately, this is heavy and
 resource-consuming. This is especially bad if you have events being raised
 frequently and a considerable number of observers.
 
-# Approach
+## Approach
 
 The way observer package tackles this problem is very simple. For every event,
 a state object containing information about the event, and a channel is
@@ -47,11 +47,9 @@ helps notify all observers that the previous state is outdated).
 Package observer defines 2 concepts:
 
 - Property: An object that is continuously updated by one or more publishers.
-- Stream: The list of values a property is updated to. For every property
-update, that value is appended to the list in the order they happen, and is
-only discarded when you advance to the next value.
+- Stream: The list of values a property is updated to. For every property update, that value is appended to the list in the order they happen, and is only discarded when you advance to the next value.
 
-# Memory Usage
+## Memory Usage
 
 The amount of memory used for one property is not dependent on the number of
 observers. It should be proportional to the number of value updates since the
@@ -59,11 +57,11 @@ value last obtained by the slowest observer. As long as you keep advancing all
 your observers, garbage collection will take place and keep memory usage
 stable.
 
-# How to Use
+## How to Use
 
 First, you need to install the package:
 
-```
+```text
 go get -u github.com/imkira/go-observer
 ```
 
@@ -78,12 +76,12 @@ The package will be imported with ```observer``` as name.
 The following example creates one property that is updated every second by one
 or more publishers, and observed by one or more observers.
 
-## Documentation
+### Documentation
 
 For advanced usage, make sure to check the
 [available documentation here](http://godoc.org/github.com/imkira/go-observer).
 
-## Example: Creating a Property
+### Example: Creating a Property
 
 The following code creates a property with initial value ```1```.
 
@@ -95,7 +93,7 @@ prop := observer.NewProperty(val)
 After creating the property, you can pass it around to publishers or
 observers as you want.
 
-## Example: Publisher
+### Example: Publisher
 
 The following code represents a publisher that increments the value of the
 property by one every second.
@@ -112,10 +110,9 @@ for {
 
 Note:
 
-- Property is goroutine safe: you can use it concurrently from multiple
-goroutines.
+- Property is goroutine safe: you can use it concurrently from multiple goroutines.
 
-## Example: Observer
+### Example: Observer
 
 The following code represents an observer that prints the initial value of a
 property and waits indefinitely for changes to its value. When there is a
@@ -141,11 +138,9 @@ for {
 
 Note:
 
-- Stream is not goroutine safe: You must create one stream by calling
-  ```Property.Observe()``` or ```Stream.Clone()``` if you want to have
-  concurrent observers for the same property or stream.
+- Stream is not goroutine safe: You must create one stream by calling ```Property.Observe()``` or ```Stream.Clone()``` if you want to have concurrent observers for the same property or stream.
 
-## Example
+### Example
 
 Please check
 [examples/multiple.go](https://github.com/imkira/go-observer/blob/master/examples/multiple.go)

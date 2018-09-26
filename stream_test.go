@@ -166,7 +166,7 @@ func TestStreamConcurrencyWithClones(t *testing.T) {
 func testStreamRead(s Stream, initial, final int, err chan error) {
 	val := s.Value().(int)
 	if val != initial {
-		err <- fmt.Errorf("Expecting %#v but got %#v\n", initial, val)
+		err <- fmt.Errorf("expecting %#v but got %#v", initial, val)
 		return
 	}
 	for i := initial + 1; i <= final; i++ {
@@ -174,7 +174,7 @@ func testStreamRead(s Stream, initial, final int, err chan error) {
 		val = s.WaitNext().(int)
 		expected := prevVal + 1
 		if val != expected {
-			err <- fmt.Errorf("Expecting %#v but got %#v\n", expected, val)
+			err <- fmt.Errorf("expecting %#v but got %#v", expected, val)
 			return
 		}
 	}
