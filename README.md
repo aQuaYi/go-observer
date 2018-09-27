@@ -7,14 +7,11 @@
 [![codebeat badge](https://codebeat.co/badges/28bdd579-8b34-4940-a3e0-35ac52794a42)](https://codebeat.co/projects/github-com-imkira-go-observer)
 [![goreportcard](https://goreportcard.com/badge/github.com/imkira/go-observer)](https://goreportcard.com/report/github.com/imkira/go-observer)
 
-observer is a [Go](http://golang.org) package that aims to simplify the problem
-of channel-based broadcasting of events from one or more publishers to one or
-more observers.
+本项目从 [go-observer](https://github.com/imkira/go-observer) 分叉并简化而来，用于发送广播。
 
-## Problem
+## 问题
 
-The typical quick-and-dirty approach to notifying a set of observers in go is
-to use channels and call each in a for loop, like the following:
+在 Go 语言中，使用 channel 给各个 goroutine 发送消息的方式如下：
 
 ```go
 for _, channel := range channels {
@@ -22,126 +19,88 @@ for _, channel := range channels {
 }
 ```
 
-There are two problems with this approach:
+这种方式存在两个缺陷：
 
-- The broadcaster blocks every time some channel is not ready to be written to.
-- If the broadcaster blocks for some channel, the remaining channels will not
-  be written to (and therefore not receive the event) until the blocking
-  channel is finally ready.
-- It is O(N). The more observers you have, the worse this loop will behave.
+- 一旦某个 channel 处于阻塞状态，此 channel 以及后续，都无法收到消息。
+- 这个方法的复杂度是 O(N)，观察者越多，越消耗资源。
 
-Of course, this could be solved by creating one goroutine for each channel so
-the broadcaster doesn't block. Unfortunately, this is heavy and
-resource-consuming. This is especially bad if you have events being raised
-frequently and a considerable number of observers.
-
-## Approach
-
-The way observer package tackles this problem is very simple. For every event,
-a state object containing information about the event, and a channel is
-created. State objects are managed using a singly linked list structure: every
-state points to the next. When a new event is raised, a new state object is
-appended to the list and the channel of the previous state is closed (this
-helps notify all observers that the previous state is outdated).
-
-Package observer defines 2 concepts:
-
-- Property: An object that is continuously updated by one or more publishers.
-- Stream: The list of values a property is updated to. For every property update, that value is appended to the list in the order they happen, and is only discarded when you advance to the next value.
-
-## Memory Usage
-
-The amount of memory used for one property is not dependent on the number of
-observers. It should be proportional to the number of value updates since the
-value last obtained by the slowest observer. As long as you keep advancing all
-your observers, garbage collection will take place and keep memory usage
-stable.
-
-## How to Use
-
-First, you need to install the package:
-
-```text
-go get -u github.com/imkira/go-observer
-```
-
-Then, you need to include it in your source:
+## 解决方法
 
 ```go
-import "github.com/imkira/go-observer"
+type state struct {
+  value interface{}
+  next  *state
+  done  chan struct{}
+}
 ```
 
-The package will be imported with ```observer``` as name.
+- value: 用于记录信息
+- next: 指向下一个 state
+- done: 当此 state.next 指向的新 state 时，关闭 done。利用关闭后的 channel 总是可以获取信息的特性，告诉 observer 还有后续 state。
+
+包中含有两个接口
+
+- Property: 相等于 publisher
+- Stream: 相等于 observer
+
+## 内存占用
+
+Stream 的内存占用取决于其长度，由读取速度最慢的 observer 决定。使用时，请确保各个 observer 都能尽快地读取。
+
+## 使用方法
+
+首先，需要安装
+
+```text
+go get -u github.com/aQuaYi/observer
+```
+
+然后导入
+
+```go
+import "github.com/aQuaYi/observer"
+```
 
 The following example creates one property that is updated every second by one
 or more publishers, and observed by one or more observers.
 
-### Documentation
+### 文档
 
-For advanced usage, make sure to check the
-[available documentation here](http://godoc.org/github.com/imkira/go-observer).
+更多使用方法，可以查看[在线文档](https://godoc.org/github.com/aQuaYi/observer).
 
-### Example: Creating a Property
-
-The following code creates a property with initial value ```1```.
+### 示例：Property 和 Publisher
 
 ```go
 val := 1
-prop := observer.NewProperty(val)
-```
-
-After creating the property, you can pass it around to publishers or
-observers as you want.
-
-### Example: Publisher
-
-The following code represents a publisher that increments the value of the
-property by one every second.
-
-```go
-val := 1
+prop := observer.NewProperty(val) // 创建了一个 Property，具有初始值 1
 for {
   time.Sleep(time.Second)
   val += 1
   fmt.Printf("will publish value: %d\n", val)
-  prop.Update(val)
+  prop.Update(val) // 每次都利用 val 的新值更新 Property
 }
 ```
 
-Note:
+注意：
 
-- Property is goroutine safe: you can use it concurrently from multiple goroutines.
+- Property 是线程安全的，可以复制到多个 Publisher 同时更新
 
-### Example: Observer
-
-The following code represents an observer that prints the initial value of a
-property and waits indefinitely for changes to its value. When there is a
-change, the stream is advanced and the current value of the property is
-printed.
+### 示例: Observer
 
 ```go
-stream := prop.Observe()
-val := stream.Value().(int)
-fmt.Printf("initial value: %d\n", val)
+stream := prop.Observe() // 从 Property 生成 Stream
 for {
-  select {
-    // wait for changes
-    case <-stream.Changes():
-      // advance to next value
-      stream.Next()
-      // new value
-      val = stream.Value().(int)
-      fmt.Printf("got new value: %d\n", val)
-  }
+  val := stream.Value().(int) // 获取 Stream 中第一个 state 的值
+  stream.Wait() // 当 stream 到达尾部时候，会发生阻塞
 }
 ```
 
-Note:
+注意：
 
-- Stream is not goroutine safe: You must create one stream by calling ```Property.Observe()``` or ```Stream.Clone()``` if you want to have concurrent observers for the same property or stream.
+- Stream **不**是线程安全的。必须使用 ```Property.Observe()``` 或 ```Stream.Clone()``` 创建新的 Stream。
 
-### Example
+### 实例
 
-Please check
+请前往
 [examples/multiple.go](https://github.com/imkira/go-observer/blob/master/examples/multiple.go)
-for a simple example on how to use multiple observers with a single updater.
+查看多个 Publisher 和多个 Observer 的简单例子。
