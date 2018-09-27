@@ -24,12 +24,6 @@ type Stream interface {
 	// they may have different values depending on when they advance the stream
 	// with Next.
 	Clone() Stream
-
-	// TODO: 删除以下 接口
-
-	// Next advances this stream to the next state.
-	// You should never call this unless Changes channel is closed.
-	Next() interface{}
 }
 
 type stream struct {
@@ -52,9 +46,4 @@ func (s *stream) WaitNext() interface{} {
 
 func (s *stream) Clone() Stream {
 	return &stream{state: s.state}
-}
-
-func (s *stream) Next() interface{} {
-	s.state = s.state.next
-	return s.state.value
 }

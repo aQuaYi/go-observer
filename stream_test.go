@@ -30,11 +30,11 @@ func TestStreamNextValue(t *testing.T) {
 	state1 := newState(10)
 	stream := &stream{state: state1}
 	state2 := state1.update(15)
-	if val := stream.Next(); val != 15 {
+	if val := stream.WaitNext(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
 	}
 	state2.update(20)
-	if val := stream.Next(); val != 20 {
+	if val := stream.WaitNext(); val != 20 {
 		t.Fatalf("Expecting 20 but got %#v\n", val)
 	}
 }
@@ -61,14 +61,14 @@ func TestStreamClone(t *testing.T) {
 		t.Fatalf("Expecting 10 but got %#v\n", val)
 	}
 	state.update(15)
-	stream1.Next()
+	stream1.WaitNext()
 	if val := stream1.Value(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
 	}
 	if val := stream2.Value(); val != 10 {
 		t.Fatalf("Expecting 10 but got %#v\n", val)
 	}
-	stream2.Next()
+	stream2.WaitNext()
 	if val := stream2.Value(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
 	}
