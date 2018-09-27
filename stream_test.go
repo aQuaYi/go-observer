@@ -39,21 +39,6 @@ func TestStreamNextValue(t *testing.T) {
 	}
 }
 
-func TestStreamHasChanges(t *testing.T) {
-	state := newState(10)
-	stream := &stream{state: state}
-	if stream.HasNext() {
-		t.Fatalf("Expecting no changes\n")
-	}
-	state.update(15)
-	if !stream.HasNext() {
-		t.Fatalf("Expecting changes\n")
-	}
-	if val := stream.Next(); val != 15 {
-		t.Fatalf("Expecting 15 but got %#v\n", val)
-	}
-}
-
 func TestStreamWaitsNext(t *testing.T) {
 	state := newState(10)
 	stream := &stream{state: state}
@@ -63,7 +48,7 @@ func TestStreamWaitsNext(t *testing.T) {
 			t.Fatalf("Expecting %#v but got %#v\n", i, val)
 		}
 	}
-	if stream.HasNext() {
+	if stream.state.next != nil {
 		t.Fatalf("Expecting no changes\n")
 	}
 }
@@ -72,19 +57,10 @@ func TestStreamClone(t *testing.T) {
 	state := newState(10)
 	stream1 := &stream{state: state}
 	stream2 := stream1.Clone()
-	if stream2.HasNext() {
-		t.Fatalf("Expecting no changes\n")
-	}
 	if val := stream2.Value(); val != 10 {
 		t.Fatalf("Expecting 10 but got %#v\n", val)
 	}
 	state.update(15)
-	if !stream1.HasNext() {
-		t.Fatalf("Expecting changes\n")
-	}
-	if !stream2.HasNext() {
-		t.Fatalf("Expecting changes\n")
-	}
 	stream1.Next()
 	if val := stream1.Value(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
@@ -95,12 +71,6 @@ func TestStreamClone(t *testing.T) {
 	stream2.Next()
 	if val := stream2.Value(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
-	}
-	if stream1.HasNext() {
-		t.Fatalf("Expecting no changes\n")
-	}
-	if stream2.HasNext() {
-		t.Fatalf("Expecting no changes\n")
 	}
 }
 

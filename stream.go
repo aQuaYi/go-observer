@@ -30,9 +30,6 @@ type Stream interface {
 	// Next advances this stream to the next state.
 	// You should never call this unless Changes channel is closed.
 	Next() interface{}
-
-	// HasNext checks whether there is a new value available.
-	HasNext() bool
 }
 
 type stream struct {
@@ -60,13 +57,4 @@ func (s *stream) Clone() Stream {
 func (s *stream) Next() interface{} {
 	s.state = s.state.next
 	return s.state.value
-}
-
-func (s *stream) HasNext() bool {
-	select {
-	case <-s.state.done:
-		return true
-	default:
-		return false
-	}
 }
