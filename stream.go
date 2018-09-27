@@ -8,8 +8,24 @@ package observer
 // the same property, either use Property.Observe (goroutine-safe) or use
 // Stream.Clone (before passing it to another goroutine).
 type Stream interface {
-	// Value returns the current value for this stream.
+	// Wait 等待 Stream 更新，
+	// 会在 Stream 没有发生更新时，发生祖塞
+	Wait()
+
+	// Value 可以获取 Stream 当前的值
 	Value() interface{}
+
+	// Next = Wait + Value
+	// 注意： Next 无法获取到 Stream 生成时的第一个值
+	WaitNext() interface{} // TODO: 修改变量名称到 Next
+
+	// Clone creates a new independent stream from this one but sharing the same
+	// Property. Updates to the property will be reflected in both streams but
+	// they may have different values depending on when they advance the stream
+	// with Next.
+	Clone() Stream
+
+	// TODO: 删除以下 接口
 
 	// Changes returns the channel that is closed when a new value is available.
 	Changes() chan struct{}
@@ -20,28 +36,28 @@ type Stream interface {
 
 	// HasNext checks whether there is a new value available.
 	HasNext() bool
-
-	// WaitNext waits for Changes to be closed, advances the stream and returns
-	// the current value.
-	WaitNext() interface{}
-
-	// Clone creates a new independent stream from this one but sharing the same
-	// Property. Updates to the property will be reflected in both streams but
-	// they may have different values depending on when they advance the stream
-	// with Next.
-	Clone() Stream
 }
 
 type stream struct {
 	state *state
 }
 
-func (s *stream) Clone() Stream {
-	return &stream{state: s.state}
-}
-
 func (s *stream) Value() interface{} {
 	return s.state.value
+}
+
+func (s *stream) Wait() {
+	<-s.state.done
+	s.state = s.state.next
+}
+
+func (s *stream) WaitNext() interface{} {
+	s.Wait()
+	return s.Value()
+}
+
+func (s *stream) Clone() Stream {
+	return &stream{state: s.state}
 }
 
 func (s *stream) Changes() chan struct{} {
@@ -60,10 +76,4 @@ func (s *stream) HasNext() bool {
 	default:
 		return false
 	}
-}
-
-func (s *stream) WaitNext() interface{} {
-	<-s.state.done
-	s.state = s.state.next
-	return s.state.value
 }
