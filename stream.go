@@ -27,9 +27,6 @@ type Stream interface {
 
 	// TODO: 删除以下 接口
 
-	// Changes returns the channel that is closed when a new value is available.
-	Changes() chan struct{}
-
 	// Next advances this stream to the next state.
 	// You should never call this unless Changes channel is closed.
 	Next() interface{}
@@ -58,10 +55,6 @@ func (s *stream) WaitNext() interface{} {
 
 func (s *stream) Clone() Stream {
 	return &stream{state: s.state}
-}
-
-func (s *stream) Changes() chan struct{} {
-	return s.state.done
 }
 
 func (s *stream) Next() interface{} {

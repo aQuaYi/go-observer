@@ -102,5 +102,5 @@ for {
 ### 实例
 
 请前往
-[examples/multiple.go](https://github.com/imkira/go-observer/blob/master/examples/multiple.go)
+[examples/multiple.go](https://github.com/aQuaYi/observer/blob/master/examples/multiple.go)
 查看多个 Publisher 和多个 Observer 的简单例子。
