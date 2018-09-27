@@ -30,11 +30,11 @@ func TestStreamNextValue(t *testing.T) {
 	state1 := newState(10)
 	stream := &stream{state: state1}
 	state2 := state1.update(15)
-	if val := stream.WaitNext(); val != 15 {
+	if val := stream.Next(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
 	}
 	state2.update(20)
-	if val := stream.WaitNext(); val != 20 {
+	if val := stream.Next(); val != 20 {
 		t.Fatalf("Expecting 20 but got %#v\n", val)
 	}
 }
@@ -44,7 +44,7 @@ func TestStreamWaitsNext(t *testing.T) {
 	stream := &stream{state: state}
 	for i := 15; i <= 100; i++ {
 		state = state.update(i)
-		if val := stream.WaitNext(); val != i {
+		if val := stream.Next(); val != i {
 			t.Fatalf("Expecting %#v but got %#v\n", i, val)
 		}
 	}
@@ -61,14 +61,14 @@ func TestStreamClone(t *testing.T) {
 		t.Fatalf("Expecting 10 but got %#v\n", val)
 	}
 	state.update(15)
-	stream1.WaitNext()
+	stream1.Next()
 	if val := stream1.Value(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
 	}
 	if val := stream2.Value(); val != 10 {
 		t.Fatalf("Expecting 10 but got %#v\n", val)
 	}
-	stream2.WaitNext()
+	stream2.Next()
 	if val := stream2.Value(); val != 15 {
 		t.Fatalf("Expecting 15 but got %#v\n", val)
 	}
@@ -108,7 +108,7 @@ func testStreamRead(s Stream, initial, final int, err chan error) {
 	}
 	for i := initial + 1; i <= final; i++ {
 		prevVal := val
-		val = s.WaitNext().(int)
+		val = s.Next().(int)
 		expected := prevVal + 1
 		if val != expected {
 			err <- fmt.Errorf("expecting %#v but got %#v", expected, val)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/imkira/go-observer"
+	"github.com/aQuaYi/observer"
 )
 
 func runPublisher(prop observer.Property) {
@@ -23,13 +23,7 @@ func runObserver(id int, prop observer.Property) {
 	for {
 		val := stream.Value().(int)
 		fmt.Printf("Observer: %d, Value: %d\n", id, val)
-
-		select {
-		// wait for changes
-		case <-stream.Changes():
-			// advance to next value
-			stream.Next()
-		}
+		stream.Wait()
 	}
 }
 

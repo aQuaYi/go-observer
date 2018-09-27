@@ -9,7 +9,7 @@ package observer
 // Stream.Clone (before passing it to another goroutine).
 type Stream interface {
 	// Wait 等待 Stream 更新，
-	// 会在 Stream 没有发生更新时，发生祖塞
+	// 会在 Stream 没有发生更新时，发生阻塞
 	Wait()
 
 	// Value 可以获取 Stream 当前的值
@@ -17,7 +17,7 @@ type Stream interface {
 
 	// Next = Wait + Value
 	// 注意： Next 无法获取到 Stream 生成时的第一个值
-	WaitNext() interface{} // TODO: 修改变量名称到 Next
+	Next() interface{}
 
 	// Clone creates a new independent stream from this one but sharing the same
 	// Property. Updates to the property will be reflected in both streams but
@@ -39,7 +39,7 @@ func (s *stream) Wait() {
 	s.state = s.state.next
 }
 
-func (s *stream) WaitNext() interface{} {
+func (s *stream) Next() interface{} {
 	s.Wait()
 	return s.Value()
 }
