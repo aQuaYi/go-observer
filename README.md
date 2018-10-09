@@ -3,7 +3,7 @@
 [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/imkira/go-observer/blob/master/LICENSE.txt)
 [![GoDoc](https://godoc.org/github.com/imkira/go-observer?status.svg)](https://godoc.org/github.com/imkira/go-observer)
 [![Build Status](https://travis-ci.org/aQuaYi/observer.svg?branch=master)](https://travis-ci.org/aQuaYi/observer)
-[![Coverage](https://codecov.io/gh/imkira/go-observer/branch/master/graph/badge.svg)](https://codecov.io/gh/imkira/go-observer)
+[![codecov](https://codecov.io/gh/aQuaYi/observer/branch/master/graph/badge.svg)](https://codecov.io/gh/aQuaYi/observer)
 [![codebeat badge](https://codebeat.co/badges/28bdd579-8b34-4940-a3e0-35ac52794a42)](https://codebeat.co/projects/github-com-imkira-go-observer)
 [![goreportcard](https://goreportcard.com/badge/github.com/imkira/go-observer)](https://goreportcard.com/report/github.com/imkira/go-observer)
 
