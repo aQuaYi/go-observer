@@ -5,8 +5,7 @@
 [![Build Status](https://travis-ci.org/aQuaYi/observer.svg?branch=master)](https://travis-ci.org/aQuaYi/observer)
 [![codecov](https://codecov.io/gh/aQuaYi/observer/branch/master/graph/badge.svg)](https://codecov.io/gh/aQuaYi/observer)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aQuaYi/observer)](https://goreportcard.com/report/github.com/aQuaYi/observer)
-
-[![codebeat badge](https://codebeat.co/badges/28bdd579-8b34-4940-a3e0-35ac52794a42)](https://codebeat.co/projects/github-com-imkira-go-observer)
+[![codebeat badge](https://codebeat.co/badges/7bdff7ce-5bed-4d21-ae7f-36bc813e2ab2)](https://codebeat.co/projects/github-com-aquayi-observer-master)
 
 本项目从 [go-observer](https://github.com/imkira/go-observer) 分叉并简化而来，用于发送广播。
 
@@ -61,9 +60,6 @@ go get -u github.com/aQuaYi/observer
 ```go
 import "github.com/aQuaYi/observer"
 ```
-
-The following example creates one property that is updated every second by one
-or more publishers, and observed by one or more observers.
 
 ### 文档
 
